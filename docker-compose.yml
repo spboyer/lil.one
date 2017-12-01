@@ -1,0 +1,19 @@
+version: '2'
+services:
+  function:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spboyer/lilone
+    container_name: lilone
+    env_file:
+        - lilone.env
+    ports:
+      - "5003:80"
+    links:
+      - redis
+  redis:
+    image: redis:alpine
+    container_name: redisone
+    ports:
+      - "6379:6379"

@@ -1,0 +1,68 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: redisone
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redisone
+    spec:
+      containers:
+      - name: redisone
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+          name: redisone
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redisone
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: redisone
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: lilone
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lilone
+    spec:
+      containers:
+      - env:
+        - name: APPINSIGHTS_INSTRUMENTATIONKEY
+          value: insertdevkeyhere
+        - name: REDIS_HOST
+          value: redisone
+        - name: REDIS_PORT
+          value: "6379"
+        - name: SHORTENER_URL
+          value: http://lil.one/
+        - name: UTM_SOURCE
+          value: shboyer
+        image: spboyer/lilone
+        name: lilone
+        ports:
+        - containerPort: 80
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lilone
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: lilone
